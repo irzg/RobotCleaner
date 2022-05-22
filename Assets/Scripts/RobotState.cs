@@ -12,6 +12,7 @@ namespace Assets.Scripts
         DrivingToCrate,    // driving towards crate
         Grabbing,   // grabbing crate (ik)
         Attaching,  // attaching hand to crate
+        Lifting,    // lifting the object
         Carrying,   // driving with crate attached
         Throwing,   // throwing crate
         Finished    // no more crates

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.Experimental.U2D.IK;
+
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CrateFinder))]
@@ -12,8 +12,8 @@ public class Robot : MonoBehaviour
     private Rigidbody2D _robotBody = null;
     private CrateFinder _crateFinder = null;
 
-    private float _moveSpeed = 1f;
-    private float _pickupDistance = 1.5f;
+    private float _moveSpeed = 0.5f;
+    private float _pickupDistance = 2.5f;
 
     private float _throwDistance = 3.5f;
 
@@ -34,7 +34,7 @@ public class Robot : MonoBehaviour
     private Crate _targetCrate = null;
 
     [SerializeField]
-    CCDSolver2D _ikSolver = null;
+    UnityEngine.U2D.IK.CCDSolver2D _ikSolver = null;
 
     [SerializeField]
     Animator _animator = null;
@@ -98,6 +98,10 @@ public class Robot : MonoBehaviour
 
                 break;
 
+            case RobotState.Carrying:
+                carryStart = transform.position.x;
+                break;
+
             case RobotState.Throwing:
 
                 IKEnabled = false;
@@ -130,6 +134,10 @@ public class Robot : MonoBehaviour
 
             case RobotState.Attaching:
                 ProcessAttaching();
+                break;
+
+            case RobotState.Lifting:
+                ProcessLifting();
                 break;
 
             case RobotState.Carrying:
@@ -218,10 +226,19 @@ public class Robot : MonoBehaviour
             _hand.Grab(_targetCrate.Body);
 
             // set ik to default
-            _ikSolver.GetChain(0).target = null;
+            // _ikSolver.GetChain(0).target = null;
 
             // need to move away?
+            SetState(RobotState.Lifting);
+        }
+    }
 
+    private void ProcessLifting()
+    {
+        // check joint angles / time
+
+        if (_hand.IsRetracted())
+        {
             if (transform.position.x < -3 || transform.position.x > 3)
             {
                 SetState(RobotState.Carrying);
@@ -229,10 +246,21 @@ public class Robot : MonoBehaviour
             else
             {
                 SetState(RobotState.Throwing);
-            }            
+            }
         }
+
+        //if (transform.position.x < -3 || transform.position.x > 3)
+        //{
+        //    SetState(RobotState.Carrying);
+        //}
+        //else
+        //{
+        //    SetState(RobotState.Throwing);
+        //}
     }
 
+
+    private float carryStart;
     private void ProcessCarrying()
     {
         bool redCrateTooClose = transform.position.x < -3;
@@ -241,7 +269,6 @@ public class Robot : MonoBehaviour
         if (redCrateTooClose)
         {
             _robotBody.velocity = new Vector2(_moveSpeed, 0);
-
         }
 
         else if (blueCrateTooClose)

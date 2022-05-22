@@ -11,11 +11,26 @@ public class RobotHand : MonoBehaviour
     private Animator _animator = null;
     public Action ThrowEnded;
 
+    [SerializeField]
+    public Transform _lowerHand = null;
+
+    [SerializeField]
+    public Transform _upperHand = null;
+
+
     void Start()
     {
         _animator = GetComponent<Animator>();
+
     }
-    
+
+    public bool IsRetracted()
+    {
+        if (Math.Abs(_lowerHand.rotation.z) < 0.005f && Math.Abs(_upperHand.rotation.z) < 0.005f)
+            return true;
+        else
+            return false;
+    }
 
     public void Grab(Rigidbody2D body)
     {
